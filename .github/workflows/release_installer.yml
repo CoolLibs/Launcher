@@ -140,13 +140,25 @@ jobs:
           security unlock-keychain -p "$MACOS_CERT_KEYCHAIN_PASSWORD" build.keychain
           codesign --deep --force --verify --verbose --sign "Jules Fouchy" ${{github.workspace}}/bin/Release/Coollab-Launcher
 
-      - name: Create Installer
+      - name: Zip Release binaries (Windows)
+        if: runner.os == 'Windows'
         run: |
-          cd ${{github.workspace}}/build
-          cpack
+          Compress-Archive -Path ${{github.workspace}}\bin\Release\* -DestinationPath ${{github.workspace}}\build\Coollab-Launcher-${{matrix.config.name}}.zip
 
-      - name: Release
+      - name: Release (Windows)
+        if: runner.os == 'Windows'
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ${{runner.os != 'Windows' && github.workspace || ''}}${{runner.os != 'Windows' && '/' || ''}}build/${{matrix.config.installer_name}}
+            build/Coollab-Launcher-${{matrix.config.name}}.zip
+
+    #   - name: Create Installer
+    #     run: |
+    #       cd ${{github.workspace}}/build
+    #       cpack
+
+    #   - name: Release
+    #     uses: softprops/action-gh-release@v1
+    #     with:
+    #       files: |
+    #         ${{runner.os != 'Windows' && github.workspace || ''}}${{runner.os != 'Windows' && '/' || ''}}build/${{matrix.config.installer_name}}
