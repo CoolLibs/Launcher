@@ -44,17 +44,17 @@ jobs:
       - name: Import signing certificate
         if: runner.os == 'MacOS'
         env:
-          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
-          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
           MACOS_CERT_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_CERT_KEYCHAIN_PASSWORD }}
         run: |
           echo "$MACOS_CERT_P12" | base64 --decode > macos_cert.p12
           security create-keychain -p "$MACOS_CERT_KEYCHAIN_PASSWORD" build.keychain
           security import macos_cert.p12 -k build.keychain -P "$MACOS_CERT_PASSWORD" -T /usr/bin/codesign
-        #   security list-keychains -s build.keychain
-        #   security set-keychain-settings -t 3600 -u build.keychain
-        #   security unlock-keychain -p "$MACOS_CERT_KEYCHAIN_PASSWORD" build.keychain
-        #   security find-identity -v -p codesigning build.keychain
+          security list-keychains -s build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
+          security unlock-keychain -p "$MACOS_CERT_KEYCHAIN_PASSWORD" build.keychain
+          security find-identity -v -p codesigning build.keychain
       - uses: actions/checkout@v3
         with:
           submodules: recursive
@@ -138,7 +138,7 @@ jobs:
           MACOS_CERT_KEYCHAIN_PASSWORD: ${{ secrets.MACOS_CERT_KEYCHAIN_PASSWORD }}
         run: |
           security unlock-keychain -p "$MACOS_CERT_KEYCHAIN_PASSWORD" build.keychain
-          codesign --deep --force --verify --verbose --sign "Jules Fouchy" ${{github.workspace}}/bin/Release/Coollab-Launcher
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: Jules Fouchy (5YNUCBTLY8)" ${{github.workspace}}/bin/Release/Coollab-Launcher
 
       - name: Create Installer (Window and MacOS)
         if: runner.os != 'Linux'
